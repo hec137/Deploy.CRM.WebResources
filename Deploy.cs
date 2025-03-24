@@ -18,7 +18,8 @@ namespace DeployWeb.Properties
 {
     public static class Deploy
     {
-        public static void DeployWebRes(string path, List<string> filters, ConnectionHelper connectionHelper) {
+        public static void DeployWebRes(ConnectionHelper connectionHelper, string path, List<string> filters1, List<string> filters2) {
+            var filters = filters2.Count > 0 ? filters2 : filters1;
             var filter = String.Join("", filters.Select(f => $"<condition attribute='name' operator='like' value='%{f}%' />"));
             var connections = connectionHelper.GetConnections();
 
@@ -68,8 +69,8 @@ namespace DeployWeb.Properties
             file.path = name;
             file.name = name.Replace("\\", "/").Substring(path.Length + 1);
 
-            var type = name.Split('.').Last();
-            var finalType = new OptionSetValue();
+            var type = name.Split('.')?.Last();
+            OptionSetValue finalType;
 
             switch (type)
             {
@@ -104,8 +105,7 @@ namespace DeployWeb.Properties
                     finalType = new OptionSetValue(11);
                     break;
                 default:
-                    Console.WriteLine($"Unknown Type: {type}");
-                    return null;
+                    throw new Exception($"File {name} has an unknown type");
             }
 
             file.type = finalType;

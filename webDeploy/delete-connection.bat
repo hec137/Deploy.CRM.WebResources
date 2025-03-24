@@ -9,4 +9,12 @@ For /R %package_root% %%G IN (DeployWeb.exe) do (
 :continue
 @echo Using '%exe_file%'
 REM 
-"%exe_file%" delete %CD%
+
+setlocal enabledelayedexpansion
+set cmd="%exe_file%" delete %CD%
+
+for %%A in (%*) do (
+    set cmd=!cmd! %%A
+)
+
+!cmd!

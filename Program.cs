@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
+using System.Xml.Linq;
 
 namespace DeployWeb
 {
@@ -22,31 +23,39 @@ namespace DeployWeb
         private static ConnectionHelper connections;
         static void Main(string[] args)
         {
-            if(args.Length < 1) { throw new Exception("Missing args for the console app"); }
-            var type = args[0];
-            if (args.Length < 2) { throw new Exception("Missing args for the console app"); }
+            try
+            {
 
-            var basePath = args[1].Replace("\\", "/");
-            var settingsPath = basePath + "/settings.json";
-            var filters = args.Skip(2).ToList();
+                if (args.Length < 1) { throw new Exception("Missing args for the console app"); }
+                var type = args[0];
+                if (args.Length < 2) { throw new Exception("Missing args for the console app"); }
 
-            var sr = new StreamReader(settingsPath);
-            var json = sr.ReadToEnd();
-            sr.Close();
+                var basePath = args[1].Replace("\\", "/");
+                var settingsPath = basePath + "/settings.json";
+                var filters2 = args.Skip(2).ToList();
 
-            connections = new ConnectionHelper(basePath, type);
+                var sr = new StreamReader(settingsPath);
+                var json = sr.ReadToEnd();
+                sr.Close();
 
-            var settings = JsonConvert.DeserializeObject<Settings>(json);
-            var sourcePath = settings.srcFolder;
-            filters.AddRange(settings.defFilters);
+                connections = new ConnectionHelper(basePath, type);
 
-            if (type == "deploy") { Deploy.DeployWebRes(sourcePath, filters, connections); }
-            if (type == "create") { connections.CreateConnection(); }
-            if (type == "update") { UpdateConnection(); }
-            if (type == "delete") { DeleteConnection(); }
-            if (type == "download") { Download.DownloadWebRes(sourcePath, filters, connections); }
+                var settings = JsonConvert.DeserializeObject<Settings>(json);
+                var sourcePath = settings.srcFolder;
+                var filters1 = settings.defFilters;
 
-            return;
+                if (type == "deploy") { Deploy.DeployWebRes(connections, sourcePath, filters1, filters2); }
+                if (type == "create") { connections.CreateConnection(); }
+                if (type == "update") { UpdateConnection(); }
+                if (type == "delete") { DeleteConnection(); }
+                if (type == "download") { Download.DownloadWebRes(connections, sourcePath, filters1, filters2); }
+            }
+            catch (Exception e) {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(e.Message);
+                Console.ResetColor();
+                throw e;
+            }
         }
 
         static void UpdateConnection() 

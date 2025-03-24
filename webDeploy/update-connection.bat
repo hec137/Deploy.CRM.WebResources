@@ -9,4 +9,11 @@ For /R %package_root% %%G IN (DeployWeb.exe) do (
 :continue
 @echo Using '%exe_file%'
 REM 
-"%exe_file%" update %CD%
+setlocal enabledelayedexpansion
+set cmd="%exe_file%" update %CD%
+
+for %%A in (%*) do (
+    set cmd=!cmd! %%A
+)
+
+!cmd!

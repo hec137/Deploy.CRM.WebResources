@@ -15,8 +15,9 @@ namespace DeployWeb
 {
     public static class Download
     {
-        public static void DownloadWebRes(string path, List<string> filters, ConnectionHelper connectionHelper) 
+        public static void DownloadWebRes(ConnectionHelper connectionHelper, string path, List<string> filters1, List<string> filters2) 
         {
+            var filters = filters2.Count > 0 ? filters2 : filters1;
             var filter = String.Join("", filters.Select(f => $"<condition attribute='name' operator='like' value='%{f}%' />"));
             var connections = connectionHelper.GetConnections();
 
@@ -57,6 +58,15 @@ namespace DeployWeb
         }
 
         static private void CreateFiles(List<Entity> webRes, string path) {
+            foreach (var res in webRes) {
+                var filePath = res["displayname"].ToString();
+                Console.WriteLine(filePath);
+            }
+
+            Console.WriteLine("Confirm to download [Y/n]: ");
+            var response = Console.ReadLine();
+            if (response.ToLower() == "n") { return; }
+
             foreach (var res in webRes) { 
                 var filePath = res["displayname"].ToString();
                 var depth = filePath.Split('/').Length;
